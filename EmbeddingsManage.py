@@ -11,6 +11,7 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import SimpleDirectoryReader,VectorStoreIndex
 from pathlib import Path
 import chromadb
+from workflows.runtime.types import results
 
 FOLDER_PATH = Path("pdfs")
 
@@ -40,7 +41,7 @@ def get_data() -> List[Document]:
         required_exts=[".pdf"],
         recursive=True,
         file_extractor={
-            ".pdf": PyMuPDFReader,
+            ".pdf": PyMuPDFReader(),
         }
     ).load_data()
 
@@ -71,8 +72,8 @@ def index_pdf():
         show_progress=True
     )
 
-def create_retriver():
-    index = VectorStoreIndex(
+def create_retriever():
+    index = VectorStoreIndex.from_vector_store(
         vector_store=vector_store,
         embed_model=embedding_model
     )
@@ -82,11 +83,11 @@ def create_retriver():
     )
 
 def search_best_chunk_for_context(question: str) -> List[str]:
-    retriver = create_retriver()
+    retriever = create_retriever()
 
-    results = retriver(str)
+    results = retriever.retrieve(question)
 
-    contents: List[str] = None
+    contents: List[str] = []
     for result in results:
         contents.append(
             result.node.get_content()

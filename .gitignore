@@ -1,2 +1,5 @@
 .idea
 .venv
+__pycache__/
+chroma_db/
+pdfs/83800_por.pdf
